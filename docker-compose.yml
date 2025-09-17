@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  voice-agent:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - PLIVO_AUTH_ID=${PLIVO_AUTH_ID}
+      - PLIVO_AUTH_TOKEN=${PLIVO_AUTH_TOKEN}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - VOICE_AGENT_HOST=0.0.0.0
+      - VOICE_AGENT_PORT=8080
+      - LLM_MODEL=gpt-4
+      - ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add monitoring with Prometheus
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   restart: unless-stopped
+
+  # Optional: Add logging with ELK stack
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+  #   environment:
+  #     - discovery.type=single-node
+  #   ports:
+  #     - "9200:9200"
+  #   restart: unless-stopped
